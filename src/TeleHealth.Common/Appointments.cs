@@ -23,6 +23,7 @@ public enum AppointmentStatus
 
 public class Appointment
 {
+    public Guid Id { get; set; }
     public string FirstName { get; }
     public string LastName { get; }
 

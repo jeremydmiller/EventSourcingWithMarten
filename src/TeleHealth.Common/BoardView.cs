@@ -19,6 +19,11 @@ public class BoardView
     public string Name { get; set; }
 
     public Guid Id { get; set; }
+    
+    
+    // Marten will helpfully help us out here
+    // by setting the last Event sequence encountered
+    public int Version { get; set; }
 
     public IList<BoardAppointment> Appointments { get; set; } = new List<BoardAppointment>();
     public IList<BoardProvider> Providers { get; set; } = new List<BoardProvider>();

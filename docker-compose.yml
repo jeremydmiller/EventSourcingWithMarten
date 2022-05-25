@@ -1,0 +1,11 @@
+version: '3'
+services:
+  postgresql:
+    image: "clkao/postgres-plv8:latest"
+    ports:
+     - "5433:5432"
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+     - "5672:5672"
+     - "15672:15672"

@@ -4,6 +4,8 @@ namespace TeleHealth.Common;
 
 public class ProviderShift
 {
+    public Guid Id { get; set; }
+    
     public Guid BoardId { get; private set; }
     public Guid ProviderId { get; init; }
     public ProviderStatus Status { get; private set; }

@@ -20,9 +20,6 @@ public class BoardViewProjection : ExperimentalMultiStreamAggregation<BoardView,
         return ValueTask.CompletedTask;
     }
 
-    // Marten will helpfully help us out here
-    // by setting the last Event sequence encountered
-    public int Version { get; set; }
 
     // Using event metadata
     public BoardView Create(IEvent<BoardOpened> opened)

@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleHealth.Common", "src\TeleHealth.Common\TeleHealth.Common.csproj", "{E21C7990-E5B3-4809-A7FC-F7ECAB8947F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleHealth.Backend", "src\TeleHealth.Backend\TeleHealth.Backend.csproj", "{3163F955-18A5-4943-9951-5C75EB06EA7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleHealth.WebApi", "src\TeleHealth.WebApi\TeleHealth.WebApi.csproj", "{66614FDB-5066-41D2-92EA-AE946C3A54EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleHealth.Tests", "TeleHealth.Tests\TeleHealth.Tests.csproj", "{7A42A3DA-4249-4D10-B1E6-3292FEF473FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E21C7990-E5B3-4809-A7FC-F7ECAB8947F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E21C7990-E5B3-4809-A7FC-F7ECAB8947F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E21C7990-E5B3-4809-A7FC-F7ECAB8947F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E21C7990-E5B3-4809-A7FC-F7ECAB8947F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3163F955-18A5-4943-9951-5C75EB06EA7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3163F955-18A5-4943-9951-5C75EB06EA7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3163F955-18A5-4943-9951-5C75EB06EA7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3163F955-18A5-4943-9951-5C75EB06EA7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66614FDB-5066-41D2-92EA-AE946C3A54EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66614FDB-5066-41D2-92EA-AE946C3A54EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66614FDB-5066-41D2-92EA-AE946C3A54EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66614FDB-5066-41D2-92EA-AE946C3A54EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A42A3DA-4249-4D10-B1E6-3292FEF473FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A42A3DA-4249-4D10-B1E6-3292FEF473FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A42A3DA-4249-4D10-B1E6-3292FEF473FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A42A3DA-4249-4D10-B1E6-3292FEF473FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
