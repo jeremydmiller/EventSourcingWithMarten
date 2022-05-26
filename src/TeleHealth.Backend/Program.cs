@@ -1,4 +1,5 @@
 using Marten;
+using Marten.Events.Daemon.Resiliency;
 using Marten.Events.Projections;
 using Oakton;
 using TeleHealth.Common;
@@ -14,7 +15,10 @@ var builder = Host.CreateDefaultBuilder()
             opts.Projections.SelfAggregate<ProviderShift>(ProjectionLifecycle.Inline);
 
             opts.Projections.Add<BoardViewProjection>(ProjectionLifecycle.Async);
-        });
+        })
+            
+            
+            .AddAsyncDaemon(DaemonMode.HotCold);
     });
     
 return await builder.RunOaktonCommands(args);

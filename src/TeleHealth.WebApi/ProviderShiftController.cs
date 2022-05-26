@@ -21,7 +21,7 @@ public class ProviderShiftController : ControllerBase
     {
         /* We've got options for concurrency here! */
         var stream = await session
-            .Events.FetchForWriting<ProviderShift>(charting.ShiftId);
+            .Events.FetchForExclusiveWriting<ProviderShift>(charting.ShiftId);
 
         if (stream.Aggregate.Status != ProviderStatus.Charting)
         {
