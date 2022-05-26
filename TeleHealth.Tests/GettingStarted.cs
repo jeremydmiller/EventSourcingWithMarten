@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Marten;
+using Marten.Events.Projections;
+using Shouldly;
 using TeleHealth.Common;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,7 +22,12 @@ public class GettingStarted
     public async Task start_a_new_shift()
     {
         // Initialize Marten the simplest, possible way
-        var store = DocumentStore.For(ConnectionSource.ConnectionString);
+        var store = DocumentStore.For(opts =>
+        {
+            opts.Connection(ConnectionSource.ConnectionString);
+
+            opts.Projections.SelfAggregate<ProviderShift>(ProjectionLifecycle.Inline);
+        });
 
         var provider = new Provider
         {
@@ -42,8 +49,13 @@ public class GettingStarted
         (
             new ProviderJoined(provider.Id, boardId),
             new ProviderReady(boardId)
-        );
+        ).Id;
 
         await session.SaveChangesAsync();
+
+
+        var shift = await session.Events.AggregateStreamAsync<ProviderShift>(shiftId, timestamp:DateTime.Today.AddHours(13));
+
+        shift.Name.ShouldBe("Larry Bird");
     }
 }
