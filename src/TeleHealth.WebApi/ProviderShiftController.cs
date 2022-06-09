@@ -5,7 +5,10 @@ using TeleHealth.Common;
 
 namespace TeleHealth.WebApi;
 
-public record CompleteCharting(Guid ShiftId, Guid AppointmentId, int Version);
+public record CompleteCharting(
+    Guid ShiftId, 
+    Guid AppointmentId, 
+    int Version);
 
 public class ProviderShiftController : ControllerBase
 {
@@ -21,7 +24,12 @@ public class ProviderShiftController : ControllerBase
     {
         /* We've got options for concurrency here! */
         var stream = await session
+                
+            // Note: This will try to "wait" to claim an exclusive lock for writing
+            // on the provider shift event stream
             .Events.FetchForExclusiveWriting<ProviderShift>(charting.ShiftId);
+        
+        
 
         if (stream.Aggregate.Status != ProviderStatus.Charting)
         {
