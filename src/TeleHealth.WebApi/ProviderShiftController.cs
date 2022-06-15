@@ -1,12 +1,17 @@
+using Jasper;
+using Jasper.Attributes;
+using Jasper.Persistence.Marten;
 using Marten;
 using Marten.AspNetCore;
+using Marten.Exceptions;
+using Marten.Schema;
 using Microsoft.AspNetCore.Mvc;
 using TeleHealth.Common;
 
 namespace TeleHealth.WebApi;
 
 public record CompleteCharting(
-    Guid ShiftId, 
+    Guid ProviderShiftId, 
     Guid AppointmentId, 
     int Version);
 
@@ -18,26 +23,26 @@ public class ProviderShiftController : ControllerBase
         return session.Json.WriteById<ProviderShift>(shiftId, HttpContext);
     }
 
-    public async Task CompleteCharting(
+    public Task CompleteCharting(
         [FromBody] CompleteCharting charting, 
-        [FromServices] IDocumentSession session)
+        [FromServices] ICommandBus bus)
     {
-        /* We've got options for concurrency here! */
-        var stream = await session
-                
-            // Note: This will try to "wait" to claim an exclusive lock for writing
-            // on the provider shift event stream
-            .Events.FetchForExclusiveWriting<ProviderShift>(charting.ShiftId);
-        
-        
+        // Just delegating to Jasper here
+        return bus.InvokeAsync(charting, HttpContext.RequestAborted);
+    }
+}
 
-        if (stream.Aggregate.Status != ProviderStatus.Charting)
+// This is auto-discovered by Jasper
+public class CompleteChartingHandler
+{
+    [MartenCommandWorkflow] // this opts into some Jasper middlware 
+    public ChartingFinished Handle(CompleteCharting charting, ProviderShift shift)
+    {
+        if (shift.Status != ProviderStatus.Charting)
         {
             throw new Exception("The shift is not currently charting");
         }
-        
-        stream.AppendOne(new ChartingFinished(stream.Aggregate.AppointmentId.Value, stream.Aggregate.BoardId));
 
-        await session.SaveChangesAsync();
+        return new ChartingFinished(charting.AppointmentId, shift.BoardId);
     }
 }
