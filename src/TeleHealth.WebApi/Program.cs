@@ -20,11 +20,14 @@ builder.Host.UseJasper(opts =>
     // in a separate, local queue with persistent messages for the inbox/outbox
     opts.PublishMessage<ChartingFinished>()
         .ToLocalQueue("charting")
-        .DurablyPersistedLocally();
+        .UsePersistentInbox();
     
     // If we encounter a concurrency exception, just try it immediately 
     // up to 3 times total
-    opts.Handlers.OnException<ConcurrencyException>().RetryNow(3); 
+    opts.Handlers.OnException<ConcurrencyException>()
+        .RetryOnce()
+        .Then.RetryWithCooldown(50.Milliseconds(), 250.Milliseconds())
+        .Then.MoveToErrorQueue(); 
     
     // It's an imperfect world, and sometimes transient connectivity errors
     // to the database happen

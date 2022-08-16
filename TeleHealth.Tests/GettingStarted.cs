@@ -21,40 +21,39 @@ public class GettingStarted
     [Fact]
     public async Task start_a_new_shift()
     {
-// Initialize Marten the simplest, possible way
-var store = DocumentStore.For(opts =>
-{
-    opts.Connection(ConnectionSource.ConnectionString);
+        // Initialize Marten the simplest, possible way
+        var store = DocumentStore.For(opts =>
+        {
+            opts.Connection(ConnectionSource.ConnectionString);
+        });
 
-    opts.Projections.SelfAggregate<ProviderShift>(ProjectionLifecycle.Inline);
-});
+        var provider = new Provider
+        {
+            FirstName = "Larry",
+            LastName = "Bird"
+        };
 
-var provider = new Provider
-{
-    FirstName = "Larry",
-    LastName = "Bird"
-};
+        // Just a little reference data
+        await using var session = store.LightweightSession();
+        session.Store(provider);
+        await session.SaveChangesAsync();
 
-// Just a little reference data
-await using var session = store.LightweightSession();
-session.Store(provider);
-await session.SaveChangesAsync();
+        var boardId = Guid.NewGuid();
 
-var boardId = Guid.NewGuid();
+        // Just to capture the SQL being executed to the test output
+        session.Logger = new TestOutputMartenLogger(_output);
 
-// Just to capture the SQL being executed to the test output
-session.Logger = new TestOutputMartenLogger(_output);
+        var shiftId = session.Events.StartStream<ProviderShift>
+        (
+            new ProviderJoined(provider.Id, boardId),
+            new ProviderReady(boardId)
+        ).Id;
 
-var shiftId = session.Events.StartStream<ProviderShift>
-(
-    new ProviderJoined(provider.Id, boardId),
-    new ProviderReady(boardId)
-).Id;
+        await session.SaveChangesAsync();
 
-await session.SaveChangesAsync();
-
-
-        var shift = await session.Events.AggregateStreamAsync<ProviderShift>(shiftId, timestamp:DateTime.Today.AddHours(13));
+        // More on this later!
+        var shift = await session.Events
+            .AggregateStreamAsync<ProviderShift>(shiftId);
 
         shift.Name.ShouldBe("Larry Bird");
     }
