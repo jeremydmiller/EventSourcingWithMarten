@@ -1,3 +1,5 @@
+using Marten.Schema;
+
 namespace TeleHealth.Common;
 
 internal interface BoardStateEvent{}

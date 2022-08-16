@@ -9,15 +9,13 @@ var builder = Host.CreateDefaultBuilder()
     {
         services.AddMarten(opts =>
         {
-            opts.Connection(ConnectionSource.ConnectionString);
+            opts.Connection("Host=localhost;Port=5433;Database=postgres;Username=postgres;password=postgres");
 
             opts.Projections.Add<AppointmentProjection>(ProjectionLifecycle.Inline);
             opts.Projections.SelfAggregate<ProviderShift>(ProjectionLifecycle.Inline);
 
             opts.Projections.Add<BoardViewProjection>(ProjectionLifecycle.Async);
         })
-            
-            
             .AddAsyncDaemon(DaemonMode.HotCold);
     });
     

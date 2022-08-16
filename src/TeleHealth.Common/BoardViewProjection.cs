@@ -14,7 +14,7 @@ public class BoardViewProjection : ExperimentalMultiStreamAggregation<BoardView,
 
     protected override ValueTask GroupEvents(IEventGrouping<Guid> grouping, IQuerySession session, List<IEvent> events)
     {
-        grouping.AddEvents<IBoardEvent>(x => x.BoardId, events);
+        //grouping.AddEvents<IBoardEvent>(x => x.BoardId, events);
         grouping.AddEventsWithMetadata<IEvent<BoardStateEvent>>(x => x.StreamId, events);
 
         return ValueTask.CompletedTask;
@@ -60,7 +60,7 @@ public class BoardViewProjection : ExperimentalMultiStreamAggregation<BoardView,
         appointment.Status = AppointmentStatus.Scheduled;
         appointment.ProviderId = scheduled.Data.ProviderId;
         appointment.CurrentEstimatedTime = scheduled.Data.EstimatedTime;
-        
+
         var provider = view.FindProvider(appointment.ProviderId!.Value);
         provider.Status = ProviderStatus.Assigned;
     }
@@ -74,7 +74,7 @@ public class BoardViewProjection : ExperimentalMultiStreamAggregation<BoardView,
         var provider = view.FindProvider(appointment.ProviderId!.Value);
         provider.Status = ProviderStatus.Ready;
     }
-    
+
     public void Apply(IEvent<AppointmentFinished> finished, BoardView view)
     {
         var appointment = view.FindAppointment(finished.StreamId);
@@ -94,7 +94,7 @@ public class BoardViewProjection : ExperimentalMultiStreamAggregation<BoardView,
             ShiftId = joined.StreamId,
             Status = ProviderStatus.Ready
         };
-        
+
         view.Providers.Add(boardProvider);
     }
 
@@ -105,10 +105,10 @@ public class BoardViewProjection : ExperimentalMultiStreamAggregation<BoardView,
     {
         view.FindProviderByShift(@event).Status = ProviderStatus.Charting;
     }
-    
+
     public void Apply(IEvent<ChartingFinished> @event, BoardView view)
     {
-        view.RemoveAppointment(@event.Data.AppointmentId);
+        //view.RemoveAppointment(@event.Data.AppointmentId);
     }
 
     public void Apply(IEvent<ProviderPaused> @event, BoardView view)

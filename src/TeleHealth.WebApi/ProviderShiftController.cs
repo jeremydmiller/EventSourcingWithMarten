@@ -1,6 +1,3 @@
-using Jasper;
-using Jasper.Attributes;
-using Jasper.Persistence.Marten;
 using Marten;
 using Marten.AspNetCore;
 using Marten.Exceptions;
@@ -10,11 +7,6 @@ using TeleHealth.Common;
 
 namespace TeleHealth.WebApi;
 
-public record CompleteCharting(
-    Guid ProviderShiftId, 
-    Guid AppointmentId, 
-    int Version);
-
 public class ProviderShiftController : ControllerBase
 {
     [HttpGet("/shift/{shiftId}")]
@@ -22,27 +14,43 @@ public class ProviderShiftController : ControllerBase
     {
         return session.Json.WriteById<ProviderShift>(shiftId, HttpContext);
     }
-
-    public Task CompleteCharting(
+    
+    [HttpPost("/shift/charting/complete")]
+    public async Task CompleteCharting(
         [FromBody] CompleteCharting charting, 
-        [FromServices] ICommandBus bus)
+        [FromServices] IDocumentSession session)
     {
-        // Just delegating to Jasper here
-        return bus.InvokeAsync(charting, HttpContext.RequestAborted);
-    }
-}
-
-// This is auto-discovered by Jasper
-public class CompleteChartingHandler
-{
-    [MartenCommandWorkflow] // this opts into some Jasper middlware 
-    public ChartingFinished Handle(CompleteCharting charting, ProviderShift shift)
-    {
-        if (shift.Status != ProviderStatus.Charting)
+        var stream = await session
+            .Events
+            .FetchForWriting<ProviderShift>(charting.ProviderShiftId, charting.Version);
+        
+        if (stream.Aggregate.Status != ProviderStatus.Charting)
         {
             throw new Exception("The shift is not currently charting");
         }
+        
+        stream.AppendOne(new ChartingFinished());
 
-        return new ChartingFinished(charting.AppointmentId, shift.BoardId);
+        await session.SaveChangesAsync();
     }
+
+    // [HttpPost("/shift/charting/complete")]
+    // public Task CompleteCharting(
+    //     [FromBody] CompleteCharting charting, 
+    //     [FromServices] IDocumentSession session)
+    // {
+    //     return session
+    //         .Events
+    //         .WriteToAggregate<ProviderShift>(charting.ProviderShiftId, charting.Version, stream =>
+    //         {
+    //             if (stream.Aggregate.Status != ProviderStatus.Charting)
+    //             {
+    //                 throw new Exception("The shift is not currently charting");
+    //             }
+    //
+    //             var finished = new ChartingFinished();
+    //             stream.AppendOne(finished);
+    //         });
+    // }
 }
+

@@ -24,7 +24,7 @@ public class SeedCommand : OaktonAsyncCommand<NetCoreInput>
         var patient5 = new Patient { FirstName = "Kurt", LastName = "Rambis" };
 
         await store.BulkInsertAsync(new []{patient1, patient2, patient3, patient4, patient5});
-        
+
         var provider1 = new Provider { FirstName = "Larry", LastName = "Bird" };
         var provider2 = new Provider { FirstName = "Kevin", LastName = "McHale" };
 
@@ -51,26 +51,26 @@ public class SeedCommand : OaktonAsyncCommand<NetCoreInput>
         session.Events.Append(appt3, new AppointmentRouted(boardId, patient3.Id, DateTimeOffset.Now.AddHours(3)));
         session.Events.Append(appt4, new AppointmentRouted(boardId, patient4.Id, DateTimeOffset.Now.AddHours(4)));
         session.Events.Append(appt5, new AppointmentRouted(boardId, patient5.Id, DateTimeOffset.Now.AddHours(5)));
-        
+
         await session.SaveChangesAsync();
 
-        session.Events.Append(appt1, new AppointmentScheduled(boardId, provider1.Id, DateTime.Now.AddMinutes(15)));
-        session.Events.Append(appt2, new AppointmentScheduled(boardId, provider2.Id, DateTime.Now.AddMinutes(15)));
+        session.Events.Append(appt1, new AppointmentScheduled(provider1.Id, DateTime.Now.AddMinutes(15)));
+        session.Events.Append(appt2, new AppointmentScheduled(provider2.Id, DateTime.Now.AddMinutes(15)));
 
-        session.Events.Append(shift1, new ProviderAssigned(appt1, boardId));
-        session.Events.Append(shift2, new ProviderAssigned(appt2, boardId));
-        
-        await session.SaveChangesAsync();
-        
-        session.Events.Append(appt1, new AppointmentStarted(boardId), new AppointmentFinished(boardId));
-        session.Events.Append(appt2, new AppointmentStarted(boardId));
+        session.Events.Append(shift1, new ProviderAssigned(appt1));
+        session.Events.Append(shift2, new ProviderAssigned(appt2));
 
-        session.Events.Append(shift1, new ChartingStarted(appt1, boardId), new ChartingFinished(appt1, boardId));
-        
         await session.SaveChangesAsync();
-        
+
+        session.Events.Append(appt1, new AppointmentStarted(), new AppointmentFinished());
+        session.Events.Append(appt2, new AppointmentStarted());
+
+        session.Events.Append(shift1, new ChartingStarted(), new ChartingFinished());
+
+        await session.SaveChangesAsync();
+
         AnsiConsole.Markup("[green]All data loaded successfully![/]");
-        
+
         return true;
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Marten;
-using Marten.Events.Projections;
 using Shouldly;
 using TeleHealth.Common;
 using Xunit;
@@ -9,52 +8,75 @@ using Xunit.Abstractions;
 
 namespace TeleHealth.Tests;
 
-public class GettingStarted
+public class GettingStarted : IAsyncLifetime
 {
     private readonly ITestOutputHelper _output;
+    private DocumentStore theStore;
+    private Provider theProvider;
+
+    private Guid theBoardId = Guid.NewGuid();
+    private Guid theShiftId = Guid.NewGuid();
 
     public GettingStarted(ITestOutputHelper output)
     {
         _output = output;
     }
 
-    [Fact]
-    public async Task start_a_new_shift()
+    public async Task InitializeAsync()
     {
         // Initialize Marten the simplest, possible way
-        var store = DocumentStore.For(opts =>
+        theStore = DocumentStore.For(opts =>
         {
-            opts.Connection(ConnectionSource.ConnectionString);
+            opts.Connection("Host=localhost;Port=5433;Database=postgres;Username=postgres;password=postgres");
+            opts.Logger(new TestOutputMartenLogger(_output));
         });
 
-        var provider = new Provider
+        // Rewinding any existing data first
+        await theStore.Advanced.ResetAllData();
+        
+        await using var session = theStore.LightweightSession();
+
+        // Just a little reference data
+        theProvider = new Provider
         {
             FirstName = "Larry",
             LastName = "Bird"
         };
-
-        // Just a little reference data
-        await using var session = store.LightweightSession();
-        session.Store(provider);
+        
+        session.Store(theProvider);
         await session.SaveChangesAsync();
+    }
 
-        var boardId = Guid.NewGuid();
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-        // Just to capture the SQL being executed to the test output
-        session.Logger = new TestOutputMartenLogger(_output);
+    [Fact]
+    public async Task start_a_new_shift()
+    {
+        await using var session = theStore.LightweightSession();
 
-        var shiftId = session.Events.StartStream<ProviderShift>
+        session.Events.StartStream<ProviderShift>
         (
-            new ProviderJoined(provider.Id, boardId),
-            new ProviderReady(boardId)
-        ).Id;
+            theShiftId,
+            new ProviderJoined(theProvider.Id, theBoardId),
+            new ProviderReady()
+        );
 
         await session.SaveChangesAsync();
+    }
 
-        // More on this later!
+    [Fact]
+    public async Task live_project_the_provider_shift()
+    {
+        await using var session = theStore.LightweightSession();
+        
+        // Sneak peek at projections
         var shift = await session.Events
-            .AggregateStreamAsync<ProviderShift>(shiftId);
+            .AggregateStreamAsync<ProviderShift>(theShiftId);
 
         shift.Name.ShouldBe("Larry Bird");
     }
+
 }
